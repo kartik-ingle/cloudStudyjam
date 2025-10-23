@@ -3,8 +3,8 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { useLeaderboardData } from "@/hooks/useLeaderboardData";
 import { Award, Gift, Star, Trophy } from "lucide-react";
-import csvText from "../../leaderboard.csv?raw";
 
 // Count how many students have completed 20/20 from the CSV text
 function countCompleted20(csv: string): number {
@@ -75,8 +75,8 @@ const rewardTiers = [
 ];
 
 const Rewards = () => {
-  // Compute dynamic progress from actual CSV contents
-  const completed20 = countCompleted20(csvText);
+  const { data } = useLeaderboardData();
+  const completed20 = data.filter(e => (e.skillBadgesCompleted + e.arcadeGamesCompleted) === 20).length;
 
   const tiersWithProgress = rewardTiers.map((t, idx) => {
     if (idx === 0) return { ...t, progress: `${completed20}/100` };

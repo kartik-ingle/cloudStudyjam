@@ -12,15 +12,17 @@ import { useLeaderboardData } from "@/hooks/useLeaderboardData";
 import { Award, BarChart3, Download, Medal, RefreshCw, RotateCcw, Search, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 
-
 const Leaderboard = () => {
-  const { data: allData, loading, error, lastUpdated, refreshData } = useLeaderboardData();
+  const { data, loading, error, lastUpdated, refreshData } = useLeaderboardData();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("All");
   const [sortBy, setSortBy] = useState("rank");
 
+
+
   const filteredData = useMemo(() => {
-    let filtered = allData.filter(entry => {
+    let filtered = data.filter(entry => {
       const matchesSearch = entry.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            entry.userEmail.toLowerCase().includes(searchTerm.toLowerCase());
       
@@ -64,7 +66,7 @@ const Leaderboard = () => {
     }
 
     return filtered;
-  }, [allData, searchTerm, filterLevel, sortBy]);
+  }, [data, searchTerm, filterLevel, sortBy]);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;

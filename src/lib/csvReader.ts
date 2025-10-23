@@ -46,18 +46,35 @@ export function parseCSVData(csvText: string): LeaderboardEntry[] {
 // Function to fetch and process CSV data
 export async function fetchCSVData(): Promise<LeaderboardEntry[]> {
   try {
-    // In a real application, you would fetch from an API endpoint
-    // For now, we'll use a public URL or local file
-    const response = await fetch('/leaderboard.csv');
+    const CSV_URL = (import.meta as any).env?.VITE_CSV_URL || '/leaderboard.csv';
+
+    const response = await fetch(CSV_URL, {
+      cache: 'no-store',
+      headers: {
+        'pragma': 'no-cache',
+        'cache-control': 'no-cache',
+      },
+    });
     
     if (!response.ok) {
-      throw new Error('Failed to fetch CSV data');
+      throw new Error(`Failed to fetch CSV data: ${response.status} ${response.statusText}`);
     }
+
+    const contentType = response.headers.get('content-type') || '';
+    const isLikelyCsv = /text\/csv|application\/vnd\.ms-excel|text\/plain/i.test(contentType);
+
+    const bodyText = await response.text();
+
+    if (!isLikelyCsv) {
+      const preview = bodyText.slice(0, 200).toLowerCase();
+      if (preview.includes('<html') || preview.includes('<!doctype')) {
+        throw new Error('Provided URL returned HTML instead of CSV. Use a Google Sheets CSV export or Publish-to-web CSV link.');
+      }
+      // Some hosts send text/plain without proper CSV content-type; allow if it is not HTML
+    }
+
+    const rawData = parseCSVData(bodyText);
     
-    const csvText = await response.text();
-    const rawData = parseCSVData(csvText);
-    
-    // Sort by total completion (skill badges + arcade games) and assign ranks
     const sortedData = rawData
       .sort((a, b) => {
         const aTotal = a.skillBadgesCompleted + a.arcadeGamesCompleted;
@@ -72,7 +89,6 @@ export async function fetchCSVData(): Promise<LeaderboardEntry[]> {
     return sortedData;
   } catch (error) {
     console.error('Error fetching CSV data:', error);
-    // Return empty array as fallback
     return [];
   }
 }
