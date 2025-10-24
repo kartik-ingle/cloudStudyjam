@@ -114,7 +114,7 @@ const skillBadges: BadgeCard[] = [
   },
   {
     title: "Build a Website on Google Cloud",
-    courseUrl: "https://www.skills.google/course_templates/662?utm_source=gcaf-site&utm_medium=website&utm_campaign=arcade-facilitator24",
+    courseUrl: "https://www.skills.google/course_templates/638",
     solutionsUrl: "#",
     labs: [
       { title: "Deploy Your Website on Cloud Run", labUrl: "https://www.skills.google/course_templates/638/labs/592820", solutionUrl: "https://youtu.be/ETRUXH5602U?si=hp9cv3wEZo0DMlm4" },
