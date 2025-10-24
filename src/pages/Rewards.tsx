@@ -137,6 +137,13 @@ const Rewards = () => {
                               className="w-full h-40 object-cover rounded-md border border-border/50"
                               loading="lazy"
                             />
+                          ) : index === 2 ? (
+                            <img
+                              src="/tier3.jpg"
+                              alt="Tier 3 Rewards"
+                              className="w-full h-40 object-cover rounded-md border border-border/50"
+                              loading="lazy"
+                            />
                           ) : (
                             <div className="w-full h-40 grid place-items-center rounded-md border border-dashed border-border/70 text-muted-foreground text-sm">
                               Will be announced soon
