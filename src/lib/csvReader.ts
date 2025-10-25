@@ -13,13 +13,45 @@ export interface LeaderboardEntry {
   rank: number; // calculated based on total completion
 }
 
+// CSV-safe splitter that respects quotes
+function splitCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      // If next char is also a quote, this is an escaped quote
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++; // skip the escaped quote
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  // Trim surrounding quotes and whitespace
+  return result.map(v => {
+    const trimmed = v.trim();
+    if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+      return trimmed.slice(1, -1);
+    }
+    return trimmed;
+  });
+}
+
 // Function to parse CSV data
 export function parseCSVData(csvText: string): LeaderboardEntry[] {
   const lines = csvText.trim().split('\n');
   
   return lines.slice(1).map((line, index) => {
-    // Simple CSV parsing - split by comma and handle quoted fields
-    const values = line.split(',').map(v => v.replace(/"/g, ''));
+    const values = splitCSVLine(line);
     
     const skillBadgesCompleted = parseInt(values[6]) || 0;
     const arcadeGamesCompleted = parseInt(values[8]) || 0;
@@ -46,9 +78,10 @@ export function parseCSVData(csvText: string): LeaderboardEntry[] {
 // Function to fetch and process CSV data
 export async function fetchCSVData(): Promise<LeaderboardEntry[]> {
   try {
-    const CSV_URL = (import.meta as any).env?.VITE_CSV_URL || '/leaderboard.csv';
+    const baseUrl = (import.meta as any).env?.VITE_CSV_URL || '/leaderboard.csv';
+    const url = baseUrl.includes('?') ? `${baseUrl}&t=${Date.now()}` : `${baseUrl}?t=${Date.now()}`;
 
-    const response = await fetch(CSV_URL, {
+    const response = await fetch(url, {
       cache: 'no-store',
       headers: {
         'pragma': 'no-cache',
@@ -123,3 +156,4 @@ export function calculateStats(data: LeaderboardEntry[]) {
     accessCodeRedeemed
   };
 }
+
